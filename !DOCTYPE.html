@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <title>ProFix Solution | Presupuestos</title>
+  <style>
+    :root {
+      --navy: #10243a;
+      --navy-light: #1c3854;
+      --orange: #f28b30;
+      --orange-soft: #fff2e5;
+      --ink: #1e293b;
+      --muted: #697789;
+      --line: #e5eaf0;
+      --bg: #f2f5f8;
+      --white: #fff;
+      --danger: #c24136;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.5 Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    input, button { font: inherit; }
+
+    .page {
+      max-width: 1120px;
+      margin: 28px auto;
+      padding: 0 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 15px;
+    }
+
+    .toolbar-title {
+      margin: 0;
+      color: var(--navy);
+      font-size: 19px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .button {
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--navy);
+      border-radius: 8px;
+      padding: 9px 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .16s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      border-color: #bec9d5;
+    }
+
+    .button.primary {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange);
+    }
+
+    .button.primary:hover { background: #df7620; }
+
+    .button.small {
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+
+    .button.danger { color: var(--danger); }
+
+    .document {
+      position: relative;
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid #e6ebf1;
+      border-radius: 14px;
+      box-shadow: 0 14px 40px rgba(16, 36, 58, .08);
+      padding: 38px 42px;
+    }
+
+    .document::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 6px;
+      background: linear-gradient(90deg, var(--orange) 0 28%, var(--navy) 28% 100%);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      padding: 4px 0 27px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    /* Logotipo vectorial ProFix Solution */
+    .logo {
+      display: block;
+      width: 76px;
+      height: 76px;
+      flex: 0 0 76px;
+    }
+
+    .brand-info { min-width: 0; }
+
+    .company-name {
+      width: 100%;
+      padding: 0;
+      border: 0;
+      font-size: 25px;
+      color: var(--navy);
+      font-weight: 850;
+      letter-spacing: -.7px;
+    }
+
+    .brand-tagline {
+      margin: 2px 0 8px;
+      color: var(--orange);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .company-details {
+      width: 100%;
+      padding: 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .quote-panel {
+      min-width: 255px;
+      text-align: right;
+    }
+
+    .quote-label {
+      color: var(--orange);
+      font-size: 11px;
+      letter-spacing: .18em;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .quote-heading {
+      margin: 1px 0 12px;
+      color: var(--navy);
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 850;
+    }
+
+    .quote-meta {
+      display: flex;
+      justify-content: flex-end;
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .field label, .field-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    input {
+      min-width: 0;
+      padding: 5px 6px;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      outline: none;
+      background: transparent;
+      color: var(--ink);
+    }
+
+    input:hover, input:focus {
+      border-color: #c9d3df;
+      background: #fbfcfe;
+    }
+
+    input::placeholder { color: #a3adba; }
+
+    .quote-meta input {
+      width: 125px;
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .client-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      padding: 23px 0 4px;
+    }
+
+    .client-card {
+      padding: 15px 17px;
+      border-left: 3px solid var(--orange);
+      border-radius: 0 8px 8px 0;
+      background: #f8fafc;
+    }
+
+    .client-card .field-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--navy);
+    }
+
+    .client-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px 12px;
+    }
+
+    .client-fields .field:first-child { grid-column: 1 / -1; }
+    .client-field input { width: 100%; padding-left: 0; }
+
+    .intro {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin: 25px 0 16px;
+    }
+
+    .intro h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 17px;
+    }
+
+    .intro p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .trust-chip {
+      white-space: nowrap;
+      border-radius: 20px;
+      padding: 6px 10px;
+      background: var(--orange-soft);
+      color: #a95313;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .section { margin-top: 23px; }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+    }
+
+    .category-title {
+      width: 100%;
+      padding: 4px 0;
+      color: var(--navy);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .category-actions {
+      display: flex;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 670px;
+      border-collapse: collapse;
+    }
+
+    th {
+      padding: 10px 9px;
+      background: var(--navy);
+      color: white;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    th:first-child { border-radius: 6px 0 0 6px; }
+    th:last-child { border-radius: 0 6px 6px 0; }
+
+    td {
+      padding: 7px 6px;
+      border-bottom: 1px solid #edf0f4;
+      vertical-align: middle;
+    }
+
+    td input { width: 100%; }
+    td input.number { text-align: right; }
+    td.description { min-width: 205px; }
+
+    td.amount {
+      padding-right: 11px;
+      text-align: right;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    td.remove-cell {
+      width: 34px;
+      text-align: center;
+    }
+
+    .remove-item {
+      padding: 3px;
+      border: 0;
+      background: transparent;
+      color: #9aa5b2;
+      cursor: pointer;
+      font-size: 19px;
+    }
+
+    .remove-item:hover { color: var(--danger); }
+
+    .empty-hint {
+      padding: 14px 8px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .category-subtotal {
+      display: flex;
+      justify-content: flex-end;
+      gap: 18px;
+      padding: 10px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .category-subtotal span:last-child {
+      min-width: 120px;
+      text-align: right;
+    }
+
+    .totals-layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(300px, 380px);
+      gap: 35px;
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 2px solid var(--navy);
+    }
+
+    .note-card {
+      padding: 14px 16px;
+      align-self: start;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .note-card input { width: 100%; padding-left: 0; }
+    .totals { display: flex; flex-direction: column; gap: 10px; }
+
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: #586579;
+    }
+
+    .total-line strong { color: var(--navy); }
+    .adjustment { display: flex; align-items: center; gap: 5px; }
+
+    .adjustment input {
+      width: 62px;
+      border: 1px solid var(--line);
+      text-align: right;
+    }
+
+    .grand-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-top: 5px;
+      padding: 13px 14px;
+      border-radius: 8px;
+      background: var(--navy);
+      color: white;
+      font-size: 19px;
+      font-weight: 850;
+    }
+
+    .grand-total strong { color: #ffad5c; font-size: 21px; }
+
+    .closing {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 29px;
+      padding-top: 15px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .closing strong { color: var(--navy); }
+
+    @media (max-width: 720px) {
+      .page { margin: 12px auto; padding: 0 9px; }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .toolbar-actions .button { padding: 10px 8px; font-size: 12px; }
+
+      .document {
+        padding: 28px 15px 19px;
+        border-radius: 10px;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 19px;
+        padding-bottom: 20px;
+      }
+
+      .brand { gap: 11px; }
+      .logo { width: 60px; height: 60px; flex-basis: 60px; }
+      .company-name { font-size: 21px; }
+      .brand-tagline { font-size: 9px; letter-spacing: .11em; }
+      .company-details { font-size: 11px; }
+
+      .quote-panel { min-width: 0; text-align: left; }
+      .quote-heading { font-size: 25px; }
+      .quote-meta { justify-content: flex-start; gap: 12px; }
+      .quote-meta input { width: 140px; text-align: left; }
+
+      .client-block { grid-template-columns: 1fr; gap: 11px; padding-top: 16px; }
+      .client-card { padding: 13px; }
+
+      .intro { align-items: flex-start; margin-top: 21px; }
+      .intro h2 { font-size: 16px; }
+      .trust-chip { display: none; }
+
+      .section { margin-top: 20px; }
+      .section-heading { align-items: flex-start; flex-direction: column; }
+      .category-actions { display: grid; width: 100%; grid-template-columns: 1fr 1fr; }
+      .category-actions .delete-category { grid-column: 1 / -1; }
+      .category-actions .button { min-height: 38px; }
+
+      table { min-width: 670px; }
+
+      .totals-layout {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 22px;
+      }
+
+      .grand-total { font-size: 17px; }
+      .grand-total strong { font-size: 19px; }
+
+      .closing {
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 22px;
+      }
+    }
+
+    @media print {
+      @page { size: A4; margin: 13mm; }
+
+      body {
+        background: #fff;
+        font-size: 10pt;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .page { max-width: none; margin: 0; padding: 0; }
+
+      .toolbar, .no-print, .category-actions, .remove-cell, .remove-item {
+        display: none !important;
+      }
+
+      .document {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      input {
+        border: 0 !important;
+        background: transparent !important;
+        color: #1e293b !important;
+        padding: 2px 0;
+      }
+
+      .company-name { font-size: 21pt; }
+      .category-title { padding: 2px 0; }
+      th { background: var(--navy) !important; color: white !important; }
+      .section, .client-block, .totals-layout { break-inside: avoid; }
+      .table-wrap { overflow: visible; }
+      table { min-width: 0; }
+      .grand-total { background: var(--navy) !important; }
+      .adjustment input { width: 35px; }
+      .closing { margin-top: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <h1 class="toolbar-title">Presupuestos · ProFix Solution</h1>
+      <div class="toolbar-actions">
+        <button class="button" type="button" id="addCategoryTop">＋ Nueva categoría</button>
+        <button class="button primary" type="button" onclick="window.print()">Exportar a PDF / Imprimir</button>
+      </div>
+    </div>
+
+    <article class="document">
+      <header class="header">
+        <div class="brand">
+          <!-- Logotipo profesional en SVG, integrado en el HTML -->
+          <svg class="logo" viewBox="0 0 100 100" role="img" aria-label="Logotipo ProFix Solution">
+            <defs>
+              <linearGradient id="pfNavy" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#1c3854"/>
+                <stop offset="1" stop-color="#10243a"/>
+              </linearGradient>
+            </defs>
+            <rect x="3" y="3" width="94" height="94" rx="23" fill="url(#pfNavy)"/>
+            <path d="M21 45 50 21l29 24v34H21z" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M34 78V53h13c8 0 12 4 12 11s-4 11-12 11h-5" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m63 55 16 23M79 55 63 78" fill="none" stroke="#f28b30" stroke-width="6" stroke-linecap="round"/>
+            <path d="M50 21v11" stroke="#f28b30" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+
+          <div class="brand-info">
+            <input class="company-name" id="companyName" value="ProFix Solution" aria-label="Nombre de la empresa">
+            <div class="brand-tagline">Reformas · Calidad · Confianza</div>
+            <input class="company-details" id="companyDetails" value="Reformas integrales · Acabados · Mantenimiento" aria-label="Datos de contacto de la empresa">
+          </div>
+        </div>
+
+        <div class="quote-panel">
+          <div class="quote-label">Propuesta de reforma</div>
+          <div class="quote-heading">Presupuesto</div>
+          <div class="quote-meta">
+            <div class="field">
+              <label for="quoteNumber">N.º de presupuesto</label>
+              <input id="quoteNumber" value="PFS-2026-001">
+            </div>
+            <div class="field">
+              <label for="quoteDate">Fecha</label>
+              <input id="quoteDate" type="date">
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="client-block">
+        <div class="client-card">
+          <span class="field-label">Presupuesto preparado para</span>
+          <div class="client-fields">
+            <div class="field client-field">
+              <label for="clientName">Nombre / Empresa</label>
+              <input id="clientName" placeholder="Nombre del cliente">
+            </div>
+            <div class="field client-field">
+              <label for="clientPhone">Teléfono</label>
+              <input id="clientPhone" type="tel" placeholder="Teléfono">
+            </div>
+            <div class="field client-field">
+              <label for="clientEmail">Email</label>
+              <input id="clientEmail" type="email" placeholder="cliente@email.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="client-card">
+          <span class="field-label">Nuestro compromiso</span>
+          <div style="font-size:14px;font-weight:750;color:#10243a">
+            Reformas bien hechas, de principio a fin.
+          </div>
+          <div style="margin-top:5px;color:#697789;font-size:12px">
+            Un detalle claro de cada trabajo, materiales y costes para que puedas decidir con confianza.
+          </div>
+        </div>
+      </section>
+
+      <div class="intro">
+        <div>
+          <h2>Detalle de los trabajos</h2>
+          <p>Revisa y personaliza cada partida de tu proyecto.</p>
+        </div>
+        <span class="trust-chip">CALIDAD EN CADA DETALLE</span>
+      </div>
+
+      <div id="categories"></div>
+
+      <section class="totals-layout">
+        <div class="note-card field">
+          <label for="notes">Notas y condiciones</label>
+          <input id="notes" placeholder="Validez, forma de pago, plazos u otras condiciones">
+        </div>
+
+        <div class="totals">
+          <div class="total-line">
+            <span>Subtotal</span>
+            <strong id="subtotal">0,00 €</strong>
+          </div>
+
+          <div class="total-line">
+            <span>Impuestos (IVA/Tax)</span>
+            <span class="adjustment">
+              <input type="number" id="taxRate" min="0" step="0.1" value="21" aria-label="Porcentaje de impuestos">
+              <span>%</span>
+              <strong id="taxAmount">0,00 €</strong>
+            </span>
+          </div>
+
+          <div class="total-line">
+            <span>Descuento</span>
+            <span class="adjustment">
+              <input type="number" id="discountRate" min="0" max="100" step="0.1" value="0" aria-label="Porcentaje de descuento">
+              <span>%</span>
+              <strong id="discountAmount">0,00 €</strong>
+            </span>
+          </div>
+
+          <div class="grand-total">
+            <span>Total presupuesto</span>
+            <strong id="grandTotal">0,00 €</strong>
+          </div>
+        </div>
+      </section>
+
+      <footer class="closing">
+        <span><strong>ProFix Solution</strong> · Reformas hechas con profesionalidad.</span>
+        <span>Gracias por confiar en nuestro equipo.</span>
+      </footer>
+    </article>
+  </main>
+
+  <template id="categoryTemplate">
+    <section class="section category">
+      <div class="section-heading">
+        <input class="category-title" value="Nueva categoría" aria-label="Nombre de la categoría">
+        <div class="category-actions no-print">
+          <button class="button small add-standard" type="button">＋ Ítem estándar</button>
+          <button class="button small add-area" type="button">＋ Trabajo por m²</button>
+          <button class="button small danger delete-category" type="button">Eliminar categoría</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr class="table-head"></tr></thead>
+          <tbody class="items"></tbody>
+        </table>
+        <div class="empty-hint">Añade una partida para detallar los trabajos de esta categoría.</div>
+      </div>
+
+      <div class="category-subtotal">
+        <span>Subtotal de categoría</span>
+        <span class="category-total">0,00 €</span>
+      </div>
+    </section>
+  </template>
+
+  <script>
+    (() => {
+      const categoriesEl = document.getElementById("categories");
+      const euro = new Intl.NumberFormat("es-ES", {
+        style: "currency",
+        currency: "EUR"
+      });
+
+      const money = value => euro.format(Number.isFinite(value) ? value : 0);
+
+      function numberValue(input) {
+        const value = parseFloat(input.value);
+        return Number.isFinite(value) ? value : 0;
+      }
+
+      function createCategory(title) {
+        const fragment = document.getElementById("categoryTemplate").content.cloneNode(true);
+        const category = fragment.querySelector(".category");
+        category.querySelector(".category-title").value = title;
+
+        category.querySelector(".add-standard").addEventListener("click", () => addItem(category, "standard"));
+        category.querySelector(".add-area").addEventListener("click", () => addItem(category, "area"));
+        category.querySelector(".delete-category").addEventListener("click", () => {
+          category.remove();
+          updateTotals();
+        });
+
+        categoriesEl.appendChild(fragment);
+        return categoriesEl.lastElementChild;
+      }
+
+      function numericInput(value, label) {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.className = "number";
+        input.value = value;
+        input.min = "0";
+        input.step = "any";
+        input.setAttribute("aria-label", label);
+        input.addEventListener("input", updateTotals);
+        return input;
+      }
+
+      function addItem(category, type) {
+        const header = category.querySelector(".table-head");
+        const body = category.querySelector(".items");
+        const isArea = type === "area";
+
+        if (!header.children.length) {
+          const columns = isArea
+            ? ["Descripción", "Largo (m)", "Ancho (m)", "Total m²", "Precio / m²", "Total"]
+            : ["Descripción", "Cantidad", "Precio unitario", "Total"];
+
+          columns.forEach(text => {
+            const th = document.createElement("th");
+            th.textContent = text;
+            header.appendChild(th);
+          });
+
+          const removeHead = document.createElement("th");
+          removeHead.className = "no-print";
+          header.appendChild(removeHead);
+        }
+
+        const row = document.createElement("tr");
+        row.dataset.type = type;
+
+        const descriptionCell = document.createElement("td");
+        descriptionCell.className = "description";
+
+        const description = document.createElement("input");
+        description.type = "text";
+        description.placeholder = isArea ? "Descripción del trabajo" : "Descripción del ítem";
+        description.setAttribute("aria-label", "Descripción");
+        descriptionCell.appendChild(description);
+        row.appendChild(descriptionCell);
+
+        if (isArea) {
+          ["Largo en metros", "Ancho en metros"].forEach(label => {
+            const td = document.createElement("td");
+            td.appendChild(numericInput("1", label));
+            row.appendChild(td);
+          });
+
+          const areaCell = document.createElement("td");
+          areaCell.className = "amount calculated-area";
+          areaCell.textContent = "1,00";
+          row.appendChild(areaCell);
+
+          const priceCell = document.createElement("td");
+          priceCell.appendChild(numericInput("0", "Precio por metro cuadrado"));
+          row.appendChild(priceCell);
+        } else {
+          const quantityCell = document.createElement("td");
+          quantityCell.appendChild(numericInput("1", "Cantidad"));
+          row.appendChild(quantityCell);
+
+          const priceCell = document.createElement("td");
+          priceCell.appendChild(numericInput("0", "Precio unitario"));
+          row.appendChild(priceCell);
+        }
+
+        const totalCell = document.createElement("td");
+        totalCell.className = "amount row-total";
+        totalCell.textContent = money(0);
+        row.appendChild(totalCell);
+
+        const removeCell = document.createElement("td");
+        removeCell.className = "remove-cell no-print";
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "remove-item";
+        removeButton.textContent = "×";
+        removeButton.title = "Eliminar partida";
+        removeButton.setAttribute("aria-label", "Eliminar partida");
+        removeButton.addEventListener("click", () => {
+          row.remove();
+          updateTotals();
+        });
+
+        removeCell.appendChild(removeButton);
+        row.appendChild(removeCell);
+        body.appendChild(row);
+
+        category.querySelector(".empty-hint").hidden = true;
+        updateTotals();
+        description.focus();
+      }
+
+      function updateTotals() {
+        let subtotal = 0;
+
+        document.querySelectorAll(".category").forEach(category => {
+          let categoryTotal = 0;
+
+          category.querySelectorAll(".items tr").forEach(row => {
+            const inputs = row.querySelectorAll('input[type="number"]');
+            let total = 0;
+
+            if (row.dataset.type === "area") {
+              const area = numberValue(inputs[0]) * numberValue(inputs[1]);
+              row.querySelector(".calculated-area").textContent =
+                area.toLocaleString("es-ES", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+              total = area * numberValue(inputs[2]);
+            } else {
+              total = numberValue(inputs[0]) * numberValue(inputs[1]);
+            }
+
+            row.querySelector(".row-total").textContent = money(total);
+            categoryTotal += total;
+          });
+
+          category.querySelector(".category-total").textContent = money(categoryTotal);
+          category.querySelector(".empty-hint").hidden =
+            category.querySelectorAll(".items tr").length > 0;
+          subtotal += categoryTotal;
+        });
+
+        const taxRate = Math.max(0, numberValue(document.getElementById("taxRate")));
+        const discountRate = Math.min(
+          100,
+          Math.max(0, numberValue(document.getElementById("discountRate")))
+        );
+
+        const tax = subtotal * taxRate / 100;
+        const discount = subtotal * discountRate / 100;
+
+        document.getElementById("subtotal").textContent = money(subtotal);
+        document.getElementById("taxAmount").textContent = money(tax);
+        document.getElementById("discountAmount").textContent = money(discount);
+        document.getElementById("grandTotal").textContent = money(subtotal + tax - discount);
+      }
+
+      document.getElementById("addCategoryTop").addEventListener("click", () => {
+        const category = createCategory(`Fase ${categoriesEl.children.length + 1}`);
+        category.querySelector(".category-title").focus();
+        category.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      ["taxRate", "discountRate"].forEach(id => {
+        document.getElementById(id).addEventListener("input", updateTotals);
+      });
+
+      const now = new Date();
+      const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 10);
+      document.getElementById("quoteDate").value = localDate;
+
+      createCategory("Preparación y protección");
+      createCategory("Demoliciones y retirada");
+      createCategory("Materiales y acabados");
+      createCategory("Mano de obra");
+      updateTotals();
+    })();
+  </script>
+</body>
+</html>
